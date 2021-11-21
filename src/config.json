@@ -1,0 +1,7 @@
+
+{
+    "pixiv_refresh_token": "PIXIV_TOKEN",
+    "discord_token":"DISCORD_BOT_TOKEN",
+    "artwork_url":"https://www.pixiv.net/artworks/",
+    "download_path":"."
+  }

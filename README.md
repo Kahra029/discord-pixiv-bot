@@ -1,0 +1,2 @@
+# pixivbot
+DiscordでpixivのURLを貼った際にアートワークを取得して貼り付けるbotを作成しました。
