@@ -2,12 +2,12 @@ import os
 import re
 import json
 import discord
-import pixivwork
+from pixivwork import PixivWork
 
 with open('config.json', 'r') as f:
     config = json.load(f)
 discordToken = config['discord_token']
-pixivUrl = config['artwork_url']
+artworkUrl = config['artwork_url']
 
 client = discord.Client(ws = int(os.environ.get('PORT', 5000)))
 
@@ -18,19 +18,19 @@ async def on_ready():
 @client.event
 async def on_message(message):
     content = message.content
-    if re.search(pixivUrl, content):
+    if re.search(artworkUrl, content):
         if re.search('#manga', content):
             content = content.replace('#manga', '')
         
         if re.search('!all ', content):
             content = content.replace('!all ', '')
-            artworkId = content[len(pixivUrl):]
-            work = pixivwork.Pixivwork(artworkId = artworkId)
+            artworkId = content[len(artworkUrl):]
+            work = PixivWork(artworkId)
 
-            title, user, fileName, pageCount = work.getArtworks()
-            embed=discord.Embed(title=user, description=title)
-            for i in range(pageCount):
-                artworkPath = f'{i}_{fileName}'
+            result = work.getArtworks()
+            embed=discord.Embed(title=result["user"], description=result["title"])
+            for i in range(result["pageCount"]):
+                artworkPath = f'{i}_{result["fileName"]}'
                 file = discord.File(artworkPath)
                 embed.set_image(url=f'attachment://{artworkPath}')
                 if i == 0 :
@@ -39,14 +39,13 @@ async def on_message(message):
                     await message.channel.send(file=file)
                 os.remove(artworkPath)
         else:
-            artworkId = content[len(pixivUrl):]
-            work = pixivwork.Pixivwork(artworkId = artworkId)
-
-            title, user, artworkPath = work.getArtwork()
-            file = discord.File(fp=artworkPath,filename=artworkPath)
-            embed=discord.Embed(title=user, description=title)
-            embed.set_image(url=f'attachment://{artworkPath}')
+            artworkId = content[len(artworkUrl):]
+            work = PixivWork(artworkId)
+            result = work.getArtwork()
+            file = discord.File(fp=result["fileName"],filename=result["fileName"])
+            embed=discord.Embed(title=result["user"], description=result["title"])
+            embed.set_image(url=f'attachment://{result["fileName"]}')
             await message.channel.send(file=file, embed=embed)
-            os.remove(artworkPath)
+            os.remove(result["fileName"])
 
 client.run(discordToken)
